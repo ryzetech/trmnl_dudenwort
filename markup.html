@@ -3,12 +3,25 @@
     <span class="value value--xxlarge" data-value-fit="true">{{ word }}</span>
   </div>
   <div>
-    <p class="text--gray-1" data-value-fit="true">{{ spelling }}</p>
-  </div>
-  <div>
     <p class="text--black" data-value-fit="true">{{ meaning }}</p>
   </div>
-  <div class="grid grid--cols-2">
+  <div class="item">
+        <div class="meta"></div>
+        <div class="content">
+          <span class="title title--small">Gebrauch</span>
+          <span class="description">{{ usage }}</span>
+        </div>
+      </div>
+  <div class="grid grid--cols-3">
+        <div class="row row--center">
+      <div class="item">
+        <div class="meta"></div>
+        <div class="content">
+          <span class="title title--small">Typ</span>
+          <span class="description">{{ type }}</span>
+        </div>
+      </div>
+    </div>
     <div class="row row--center">
       <div class="item">
         <div class="meta"></div>
