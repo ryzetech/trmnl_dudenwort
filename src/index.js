@@ -48,12 +48,14 @@ export default {
       // frequency
       .on('span.shaft__full', {
         text(text) {
-          wordData.fullFrequency = text.text;
+          if (text.text.length > 0)
+            wordData.fullFrequency = text.text.length;
         }
       })
       .on('span.shaft__empty', {
         text(text) {
-          wordData.emptyFrequency = text.text;
+          if (text.text.length > 0)
+            wordData.emptyFrequency = text.text.length;
         }
       })
       // spelling
@@ -76,7 +78,7 @@ export default {
       });
     
     await dataExtractor.transform(dudenWordResponse).text();
-    
+
     if (wordData.fullFrequency !== undefined && wordData.emptyFrequency !== undefined) {
       wordData.frequency = createFrequency(wordData.fullFrequency, wordData.emptyFrequency);
       delete wordData.fullFrequency;
@@ -109,11 +111,9 @@ function createFrequency(full, empty) {
     wordFrequency += '▯';
   }
 
-	if (wordFrequency.length === 0) {
-		wordFrequency = 'nicht verfügbar';
-	} else {
-		wordFrequency = `${wordFrequency} (${full} / ${full + empty})`;
-	}
-  
+  if (wordFrequency.length === 0) {
+    wordFrequency = 'nicht verfügbar';
+  }
+
   return wordFrequency;
 }
