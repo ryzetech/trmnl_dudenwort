@@ -36,6 +36,8 @@ export default {
       spelling: '',
       meaning: '',
       origin: '',
+      usage: '',
+      type: '',
     };
 
     const dataExtractor = new HTMLRewriter()
@@ -75,6 +77,26 @@ export default {
         text(text) {
           wordData.origin += text.text.replace(/^\s+|\s+$/g, '');;
         }
+      })
+      // type
+      .on('dl.tuple:nth-child(4) > dd:nth-child(2)', {
+        text(text) {
+          console.log("type" + text.text);
+
+          if (text.text.length > 0) {
+            wordData.type = text.text.replace(/^\s+|\s+$/g, '');
+          }
+        }
+      })
+      // usage
+      .on('dl.tuple:nth-child(5) > dd:nth-child(2)', {
+        text(text) {
+          console.log("usage" + text.text);
+
+          if (text.text.length > 0) {
+            wordData.usage = text.text.replace(/^\s+|\s+$/g, '');
+          }
+        }
       });
 
     await dataExtractor.transform(dudenWordResponse).text();
@@ -91,6 +113,8 @@ export default {
     if (!wordData.spelling) wordData.spelling = 'nicht verfügbar';
     if (!wordData.meaning) wordData.meaning = 'nicht verfügbar';
     if (!wordData.origin) wordData.origin = 'nicht verfügbar';
+    if (!wordData.type) wordData.type = 'nicht verfügbar';
+    if (!wordData.usage) wordData.usage = 'nicht verfügbar';
 
     return new Response(JSON.stringify(wordData, null, 2), {
       headers: {
