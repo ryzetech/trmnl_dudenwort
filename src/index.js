@@ -7,7 +7,7 @@ export default {
     if (!dudenWDTResponse.ok) {
       return new Response('Failed to fetch Duden Wort des Tages', { status: 500 });
     }
-    
+
     let wordPath = '';
     const linkExtractor = new HTMLRewriter()
       .on('a.scene__title-link', {
@@ -16,20 +16,20 @@ export default {
           if (href) wordPath = href;
         }
       });
-      
+
     await linkExtractor.transform(dudenWDTResponse).arrayBuffer();
-    
+
     if (!wordPath) {
       return new Response('Failed to find word of the day link', { status: 500 });
     }
-    
+
     const dudenWordURL = dudenBaseUrl + wordPath;
     const dudenWordResponse = await fetch(dudenWordURL);
 
     if (!dudenWordResponse.ok) {
       return new Response('Failed to fetch Duden Wort', { status: 500 });
     }
-    
+
     const wordData = {
       word: '',
       frequency: '',
@@ -37,7 +37,7 @@ export default {
       meaning: '',
       origin: '',
     };
-    
+
     const dataExtractor = new HTMLRewriter()
       // word
       .on('span.lemma__main', {
@@ -67,16 +67,16 @@ export default {
       // meaning
       .on('#bedeutung p', {
         text(text) {
-          wordData.meaning += text.text;
+          wordData.meaning += text.text.replace(/^\s+|\s+$/g, '');;
         }
       })
       // origin
       .on('#herkunft p', {
         text(text) {
-          wordData.origin += text.text;
+          wordData.origin += text.text.replace(/^\s+|\s+$/g, '');;
         }
       });
-    
+
     await dataExtractor.transform(dudenWordResponse).text();
 
     if (wordData.fullFrequency !== undefined && wordData.emptyFrequency !== undefined) {
@@ -86,7 +86,7 @@ export default {
     } else {
       wordData.frequency = 'nicht verfügbar';
     }
-    
+
     // default values if data is missing
     if (!wordData.spelling) wordData.spelling = 'nicht verfügbar';
     if (!wordData.meaning) wordData.meaning = 'nicht verfügbar';
@@ -101,12 +101,11 @@ export default {
 };
 
 function createFrequency(full, empty) {
-	console.log(`Creating frequency with full: ${full}, empty: ${empty}`);
   let wordFrequency = '';
   for (let i = 0; i < full; i++) {
     wordFrequency += '▮';
   }
-  
+
   for (let i = 0; i < empty; i++) {
     wordFrequency += '▯';
   }
