@@ -39,6 +39,9 @@ export default {
       usage: '',
       type: '',
     };
+    
+    // Flag to track if we've already found the first definition
+    let foundFirstDefinition = false;
 
     const dataExtractor = new HTMLRewriter()
       // word
@@ -66,10 +69,28 @@ export default {
           wordData.spelling += text.text;
         }
       })
-      // meaning
+      // meaning - single definition case
       .on('#bedeutung p', {
         text(text) {
-          wordData.meaning += text.text.replace(/^\s+|\s+$/g, '');;
+          if (!foundFirstDefinition) {
+            const cleanText = text.text.replace(/^\s+|\s+$/g, '');
+            if (cleanText) {
+              wordData.meaning.push(cleanText);
+              foundFirstDefinition = true;
+            }
+          }
+        }
+      })
+      // meaning - multiple definitions case
+      .on('#bedeutungen ol.enumeration li div', {
+        text(text) {
+          if (!foundFirstDefinition) {
+            const cleanText = text.text.replace(/^\s+|\s+$/g, '');
+            if (cleanText) {
+              wordData.meaning  = cleanText;
+              foundFirstDefinition = true;
+            }
+          }
         }
       })
       // origin
@@ -81,8 +102,6 @@ export default {
       // type
       .on('dl.tuple:nth-child(4) > dd:nth-child(2)', {
         text(text) {
-          console.log("type" + text.text);
-
           if (text.text.length > 0) {
             wordData.type = text.text.replace(/^\s+|\s+$/g, '');
           }
@@ -91,8 +110,6 @@ export default {
       // usage
       .on('dl.tuple:nth-child(5) > dd:nth-child(2)', {
         text(text) {
-          console.log("usage" + text.text);
-
           if (text.text.length > 0) {
             wordData.usage = text.text.replace(/^\s+|\s+$/g, '');
           }
@@ -106,15 +123,15 @@ export default {
       delete wordData.fullFrequency;
       delete wordData.emptyFrequency;
     } else {
-      wordData.frequency = 'nicht verfügbar';
+      wordData.frequency = 'N/A';
     }
 
     // default values if data is missing
-    if (!wordData.spelling) wordData.spelling = 'nicht verfügbar';
-    if (!wordData.meaning) wordData.meaning = 'nicht verfügbar';
-    if (!wordData.origin) wordData.origin = 'nicht verfügbar';
-    if (!wordData.type) wordData.type = 'nicht verfügbar';
-    if (!wordData.usage) wordData.usage = 'nicht verfügbar';
+    if (!wordData.spelling) wordData.spelling = 'N/A';
+    if (!wordData.meaning) wordData.meaning = 'N/A';
+    if (!wordData.origin) wordData.origin = 'N/A';
+    if (!wordData.type) wordData.type = 'N/A';
+    if (!wordData.usage) wordData.usage = 'N/A';
 
     return new Response(JSON.stringify(wordData, null, 2), {
       headers: {
@@ -135,7 +152,7 @@ function createFrequency(full, empty) {
   }
 
   if (wordFrequency.length === 0) {
-    wordFrequency = 'nicht verfügbar';
+    wordFrequency = 'N/A';
   }
 
   return wordFrequency;
