@@ -40,8 +40,9 @@ export default {
       type: '',
     };
     
-    // Flag to track if we've already found the first definition
+    // tracking flags
     let foundFirstDefinition = false;
+    let foundFirstSpelling = false;
 
     const dataExtractor = new HTMLRewriter()
       // word
@@ -66,7 +67,13 @@ export default {
       // spelling
       .on('#rechtschreibung dd', {
         text(text) {
-          wordData.spelling += text.text;
+          if (!foundFirstSpelling) {
+            const cleanText = text.text.replace(/^\s+|\s+$/g, '');
+            if (cleanText) {
+              wordData.spelling = cleanText;
+              foundFirstSpelling = true;
+            }
+          }
         }
       })
       // meaning - single definition case
