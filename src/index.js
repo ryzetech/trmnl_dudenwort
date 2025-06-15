@@ -75,7 +75,7 @@ export default {
           if (!foundFirstDefinition) {
             const cleanText = text.text.replace(/^\s+|\s+$/g, '');
             if (cleanText) {
-              wordData.meaning.push(cleanText);
+              wordData.meaning = cleanText;
               foundFirstDefinition = true;
             }
           }
