@@ -39,10 +39,11 @@ export default {
       usage: '',
       type: '',
     };
-    
+
     // tracking flags
     let foundFirstDefinition = false;
     let foundFirstSpelling = false;
+    let linebreakControl = false;
 
     const dataExtractor = new HTMLRewriter()
       // word
@@ -88,19 +89,25 @@ export default {
       // meaning - multiple definitions case
       .on('#bedeutungen ol.enumeration li div', {
         text(text) {
-          if (!foundFirstDefinition) {
-            const cleanText = text.text.replace(/^\s+|\s+$/g, '');
-            if (cleanText) {
-              wordData.meaning  = cleanText;
-              foundFirstDefinition = true;
+          const cleanText = text.text.replace(/^\s+|\s+$|\s\(\d\)/g, '');
+          if (cleanText && !text.lastInTextNode) {
+            if (wordData.meaning.length === 0 || linebreakControl) {
+              wordData.meaning += cleanText;
+              linebreakControl = false;
+            } else {
+              wordData.meaning += " " + cleanText;
             }
           }
+          if (text.lastInTextNode) {
+            wordData.meaning += '\n';
+            linebreakControl = true;
+          };
         }
       })
       // origin
       .on('#herkunft p', {
         text(text) {
-          wordData.origin += text.text.replace(/^\s+|\s+$/g, '');;
+          wordData.origin += text.text.replace(/^\s+|\s\(\d\)/g, '').replace(/&nbsp;/g, ' '); // ZOMG DOUBLE REPLACE!!!
         }
       })
       // type
