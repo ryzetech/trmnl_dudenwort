@@ -1,5 +1,7 @@
 export default {
   async fetch(request, env, ctx) {
+    const timeStart = Date.now();
+
     const dudenBaseUrl = "https://www.duden.de";
     const dudenWDT = dudenBaseUrl + "/wort-des-tages";
     const dudenWDTResponse = await fetch(dudenWDT);
@@ -38,6 +40,12 @@ export default {
       origin: '',
       usage: '',
       type: '',
+      debug: {
+        wordPath: wordPath,
+        dudenWordURL: dudenWordURL,
+        fetchDate: '',
+        fetchTime: ''
+      }
     };
 
     // tracking flags
@@ -143,6 +151,9 @@ export default {
     if (!wordData.origin) wordData.origin = 'N/A';
     if (!wordData.type) wordData.type = 'N/A';
     if (!wordData.usage) wordData.usage = 'N/A';
+
+    wordData.debug.fetchDate = new Date().toISOString();
+    wordData.debug.fetchTime = Date.now() - timeStart + 'ms';
 
     return new Response(JSON.stringify(wordData, null, 2), {
       headers: {
