@@ -79,12 +79,9 @@ export default {
       // meaning - single definition case
       .on('#bedeutung p', {
         text(text) {
-          if (!foundFirstDefinition) {
-            const cleanText = text.text.replace(/^\s+|\s+$/g, '');
-            if (cleanText) {
-              wordData.meaning = cleanText;
-              foundFirstDefinition = true;
-            }
+          const cleanText = text.text.replace(/^\s+|\s+$|\s\(\d\)/g, '');
+          if (cleanText && !text.lastInTextNode) {
+            wordData.meaning += (wordData.meaning.length == 0 ? cleanText : " " + cleanText);
           }
         }
       })
